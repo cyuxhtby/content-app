@@ -1,141 +1,106 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Flex, Box } from '@chakra-ui/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import SignIn from '~/lib/components/SignIn';
-import { Welcome } from '~/lib/components/Welcome';
-import Countdown from '~/lib/components/Countdown';
-import Notes from '~/lib/components/Notes'; 
-import ClockIn from '~/lib/components/ClockIn';
 import { useAuth } from '~/lib/contexts/AuthContext';
-import ActivityPlanner from '~/lib/components/ActivityPlanner';
+import axios from 'axios';
+
+
+const OPEN_AI_API_KEY = process.env.NEXT_PUBLIC_OPEN_AI_API_KEY;
 
 const Home = () => {
   const { user } = useAuth();
+  const [content, setContent] = useState('Loading...');
 
-  const [currentView, setCurrentView] = useState(user ? 'welcome' : 'SignIn');
+  const swipeThreshold = 50;
 
-  useEffect(() => {
-    setCurrentView(user ? 'welcome' : 'SignIn');
-  }, [user]);
-
-  const variants = {
-    initial: { opacity: 0, y: 20 }, 
-    animate: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeInOut" } }, 
-    exit: { opacity: 0, y: -30, transition: { duration: 0.7, ease: "easeInOut" } }, 
-  };
-
-  const viewOrder = ['SignIn', 'welcome', 'countdown', 'notes', 'activityPlanner', 'clockIn'];
-
-  const swipeRight = () => {
-    const currentIndex = viewOrder.indexOf(currentView);
-    if (currentIndex < viewOrder.length - 1) {
-      setCurrentView(viewOrder[currentIndex + 1]);
+  const fetchFact = async () => {
+    try {
+      const response = await axios.post('https://api.openai.com/v1/completions', {
+        model: "text-davinci-003",
+        prompt: 'Tell me a single, interesting fact about science or history.',
+        max_tokens: 60,
+        temperature: 0.7
+      }, {
+        headers: {
+          'Authorization': `Bearer ${OPEN_AI_API_KEY}`
+        }
+      });
+  
+      const fact = response.data.choices[0].text.trim().split('\n')[0]; 
+      setContent(fact);
+    } catch (error) {
+      console.error('Error fetching fact:', error);
+      setContent('Failed to load fact');
     }
   };
-
-  const swipeLeft = () => {
-    const currentIndex = viewOrder.indexOf(currentView);
-    if (currentIndex > 0) {
-      setCurrentView(viewOrder[currentIndex - 1]);
-    }
-  };
-
-  const swipeThreshold = 100;
 
   const handleSwipe = (event: any, info: any) => {
-    const offset = info.offset.x;
-    if (offset > swipeThreshold) {
-      swipeLeft();
-    } else if (offset < -swipeThreshold) {
-      swipeRight();
+    const offset = info.offset.y;
+    if (Math.abs(offset) > swipeThreshold) {
+      fetchFact();
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(err => {
-          console.error('Service Worker registration failed:', err);
-        });
-    }
-  }, [user]); 
-
-  const headerHeight = '70px'; 
-  const footerHeight = '40px'; 
-
-  const showLeftOverlay = currentView !== 'welcome' && currentView !== 'SignIn';
-  const showRightOverlay = currentView !== 'clockIn' && currentView !== 'SignIn';
+  const variants = {
+    initial: { opacity: 0, scale: 0.8, y: 300 },
+    animate: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.5, type: 'spring', stiffness: 100 } },
+    exit: { opacity: 0, scale: 0.8, y: -300, transition: { duration: 0.5, type: 'spring', stiffness: 100 } },
+  };
 
   return (
     <Flex
       direction="column"
       alignItems="center"
       justifyContent="center"
-      minHeight="70vh"
-      gap={4}
-      mb={8}
-      w="full"
+      h="100vh"
+      w="100vw"
       position="relative"
+      bg="white"
+      overflow="hidden"
     >
-    
-        <>
-          {showLeftOverlay && (
-            <Box
-              position="fixed"
-              left={0}
-              top={headerHeight}
-              bottom={footerHeight}
-              w="50vw"
-              onClick={swipeLeft}
-              cursor="w-resize" 
-              zIndex="10"
-            />
-          )}
-          {showRightOverlay && (
-            <Box
-              position="fixed"
-              right={0}
-              top={headerHeight}
-              bottom={footerHeight}
-              w="50vw"
-              onClick={swipeRight}
-              cursor="e-resize" 
-              zIndex="10"
-            />
-          )}
-        </>
-     
-      {/* Main content */}
       {!user ? (
         <SignIn />
       ) : (
         <AnimatePresence>
           <motion.div
-            key={currentView}
+            key={content}
             variants={variants}
             initial="initial"
             animate="animate"
             exit="exit"
             onDragEnd={handleSwipe}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+            }}
           >
-             {currentView === 'welcome' && <Welcome />}
-             {currentView === 'countdown' && <Countdown />}
-             {currentView === 'notes' && <Notes />}
-             {currentView === 'clockIn' && <ClockIn />}
-             {currentView === 'activityPlanner' && <ActivityPlanner />} 
-            
+            <Box
+              p={4}
+              w="100%"
+              h="100%"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              fontSize={["md", "lg", "xl", "2xl"]} 
+              textAlign="center" 
+              color="black"
+              overflowWrap="break-word" 
+            >
+              {content}
+            </Box>
           </motion.div>
         </AnimatePresence>
       )}
     </Flex>
   );
-};
+}  
 
 export default Home;

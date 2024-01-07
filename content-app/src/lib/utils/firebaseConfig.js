@@ -5,13 +5,13 @@ import { getMessaging, isSupported } from 'firebase/messaging';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDZkOhH9pQhqYga6Q9VlPIeAnqhWRja8DI',
-  authDomain: 'clarity-e78d7.firebaseapp.com',
-  projectId: 'clarity-e78d7',
-  storageBucket: 'clarity-e78d7.appspot.com',
-  messagingSenderId: '380077709020',
-  appId: '1:380077709020:web:dbc0ea6d7eb47383d3c619',
-  measurementId: 'G-RZFMVFJ91V',
+  apiKey: "AIzaSyBG5KVVVu84fw9sARGGdr2K5TQlpM5iKDc",
+  authDomain: "content-a.firebaseapp.com",
+  projectId: "content-a",
+  storageBucket: "content-a.appspot.com",
+  messagingSenderId: "751599701522",
+  appId: "1:751599701522:web:a5a2d3524e0fbc660852cb",
+  measurementId: "G-7SW4890SF9"
 };
 
 const app = initializeApp(firebaseConfig);

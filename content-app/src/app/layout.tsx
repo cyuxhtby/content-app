@@ -8,11 +8,11 @@ type RootLayoutProps = {
   children: React.ReactNode;
 };
 
-const APP_NAME = 'Clarity';
+const APP_NAME = 'content-app';
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: '%s | nextarter-chakra' },
-  description: 'Clarity App',
+  description: 'personalized ai content',
   applicationName: APP_NAME,
   appleWebApp: {
     capable: true,

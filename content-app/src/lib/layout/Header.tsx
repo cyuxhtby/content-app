@@ -10,7 +10,7 @@ const Header = () => {
     <Flex as="header" width="full" align="center">
       <Box marginLeft="auto">
        {user && <EnablePush />}
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
       </Box>
     </Flex>
   );
