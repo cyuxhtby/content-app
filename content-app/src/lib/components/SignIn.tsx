@@ -12,7 +12,7 @@ const SignIn = () => {
   return (
     <VStack height="100%" justifyContent="center" textAlign="center" p={8} zIndex={20}>
       <Text fontSize="6xl" fontWeight="bold" colorScheme="white">
-        CLARITY
+        Content App
       </Text>
       <Button
         size="lg"
